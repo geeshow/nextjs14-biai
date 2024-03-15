@@ -1,0 +1,13 @@
+.toggle {
+}
+
+.toggle > input {
+  display: none;
+}
+.toggle > section {
+  display: none;
+}
+
+.toggle input[type="checkbox"]:checked~section {
+  display: block;
+}
