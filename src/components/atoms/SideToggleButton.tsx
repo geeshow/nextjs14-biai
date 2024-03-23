@@ -1,10 +1,8 @@
-import SpeechBubble from "@/components/atoms/SpeechBubble";
+import SpeechBubbleLeft from "@/components/atoms/SpeechBubbleLeft";
 
-export default function SideToggleButton({ onClick }: {
-  onClick: () => void;
-}) {
+export default function SideToggleButton() {
   return (
-      <div className="group fixed flex top-1/2 z-40" onClick={onClick}>
+      <>
         <button className="flex flex-col justify-center items-center h-12 w-8">
           <div
               className="h-4 w-1 rounded-full bg-gray-400 group-hover:bg-black transition duration-100 ease-out -translate-y-1 group-hover:rotate-12"
@@ -14,8 +12,8 @@ export default function SideToggleButton({ onClick }: {
           ></div>
         </button>
         <div className="ml-1 hidden group-hover:block">
-          <SpeechBubble text="Close sidebar"/>
+          <SpeechBubbleLeft text="Close sidebar"/>
         </div>
-      </div>
+      </>
   );
 }

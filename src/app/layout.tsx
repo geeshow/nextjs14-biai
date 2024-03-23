@@ -1,13 +1,14 @@
 import '@/app/ui/global.css';
-import { notoSansKR } from '@/app/ui/fonts';
+import { inter } from '@/app/ui/fonts';
 import { Metadata } from 'next';
+import {RecoilProvider} from "@/recoil/RecoilProvider";
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Acme Dashboard',
-    default: 'Acme Dashboard',
+    template: '%s | Union AI',
+    default: 'Explore a Universe of AI Machines - Union AI ',
   },
-  description: 'The official Next.js Learn Dashboard built with App Router.',
+  description: 'Experience diverse AI technologies, from chatbots to machine learning models, on our platform that blends innovation with user engagement',
   metadataBase: new URL('https://next-learn-dashboard.vercel.sh'),
 };
 export default function RootLayout({
@@ -17,7 +18,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${notoSansKR.className} antialiased`}>{children}</body>
+      <body className={`${inter.className} antialiased`}>
+      <RecoilProvider>
+        {children}
+      </RecoilProvider>
+      </body>
     </html>
   );
 }

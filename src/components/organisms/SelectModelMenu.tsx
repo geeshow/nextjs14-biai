@@ -1,28 +1,36 @@
-"use client";
-import SelectBox from "@/components/molecules/select-box";
-import {AcademicCapIcon, BoltIcon, ChevronDownIcon} from "@heroicons/react/24/outline";
+'use client';
+import {ChevronDownIcon} from "@heroicons/react/24/outline";
 import React from "react";
+import SelectModelList from "@/components/organisms/SelectModelList";
+import Image from "next/image";
+import {getBot} from "@/app/lib/serverFetch";
 
-export interface IOption {
-  name: string;
-  description: string;
-  value: string;
-  icon?: any;
-}
-const options = [
-  { name: "GPT-4", description: "With DALL·E, browsing and analysis Limit 40 messages / 3 hours", value: "GPT-4", icon: AcademicCapIcon },
-  { name: "GPT-3.5", description: "Great for everyday tasks", value: "GPT-3.5", icon: BoltIcon },
-];
-
-export default function SelectModelMenu() {
-  const selectedOption = (value: string) => {
-    console.log(value)
-  }
+export default function SelectModelMenu({selectedBotId}: {selectedBotId:string}) {
+  const selectedBot = getBot(selectedBotId)
+  const [ isOpen, setIsOpen ] = React.useState(false)
+  
+  React.useEffect(() => {
+    const close = (e: MouseEvent) => {
+      if (e.target instanceof Element && !e.target.closest('#SelectModelMenu')) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('click', close)
+    return () => document.removeEventListener('click', close)
+  }, [])
+  
   return (
-      <SelectBox label='ChatGPT 4'
-                 options={options}
-                 click={selectedOption}
-                 icon={<ChevronDownIcon className="w-3"/>}
-      />
+    <div>
+      <div id="SelectModelMenu" className="flex items-center justify-center hover:bg-gray-100 rounded-xl p-2 mb-2 cursor-pointer"
+           onClick={() => setIsOpen(!isOpen)}
+      >
+        <Image src={selectedBot.avatar} alt={selectedBot.name} width={20} height={20} className="rounded-full mr-2"/>
+        <div className="inline-flex items-center justify-center pr-2 text-center font-medium rounded-xl">
+          {selectedBot.name}
+        </div>
+        <ChevronDownIcon className="w-3"/>
+      </div>
+      { isOpen && <SelectModelList selectedBotId={selectedBotId} /> }
+    </div>
   );
 }

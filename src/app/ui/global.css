@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+html, body {
+  height: 100%;
+}
 input[type='number'] {
   -moz-appearance: textfield;
   appearance: textfield;
@@ -15,4 +18,39 @@ input[type='number']::-webkit-inner-spin-button {
 input[type='number']::-webkit-outer-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+/* 스크롤바 전체를 선택 */
+::-webkit-scrollbar {
+  width: 12px; /* 스크롤바의 너비 */
+}
+
+/* 스크롤바 트랙 (배경) */
+::-webkit-scrollbar-track {
+  background: transparent; /* 트랙 배경을 투명하게 설정 */
+}
+
+/* 스크롤바 핸들 */
+::-webkit-scrollbar-thumb {
+  background: #c2c2c2; /* 핸들 색상 */
+  border-radius: 6px; /* 핸들 모양 */
+}
+
+/* 스크롤바 핸들 호버 시 */
+::-webkit-scrollbar-thumb:hover {
+  background: #9a9a9a; /* 핸들 호버 색상 */
+}
+
+.side-gradient {
+  --tw-gradient-from: rgb(243 244 246 / 0.1); /* 그라데이션 시작 색상 */
+  --tw-gradient-via: rgb(243 244 246 / 0.9); /* 그라데이션 중간 색상 */
+  --tw-gradient-to: rgb(243 244 246); /* 그라데이션 끝 색상 */
+  background-image: linear-gradient(to right, var(--tw-gradient-from), var(--tw-gradient-via), var(--tw-gradient-to));
+}
+
+.side-gradient-hover {
+  --tw-gradient-from: rgb(229 231 235 / 0.1); /* 그라데이션 시작 색상 */
+  --tw-gradient-via: rgb(229 231 235 / 0.9); /* 그라데이션 중간 색상 */
+  --tw-gradient-to: rgb(229 231 235); /* 그라데이션 끝 색상 */
+  background-image: linear-gradient(to right, var(--tw-gradient-from), var(--tw-gradient-via), var(--tw-gradient-to));
 }
