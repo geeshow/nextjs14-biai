@@ -117,7 +117,7 @@ export const chats = [
   chatId: '0',
   userId: '0',
   title: 'NextJS',
-  lastMessageDate: '2024-03-23',
+  lastMessageDate: '2024-03-24 12:00:00',
   botId: 'g35',
 },
 {
@@ -152,8 +152,16 @@ export const chats = [
   chatId: '5',
   userId: '0',
   title: 'Python 3.10',
-  lastMessageDate: '2023-01-01',
+  lastMessageDate: '2022-01-01',
   botId: 'g35',
-}] as IChat[]
+},
+{
+  chatId: '6',
+  userId: '0',
+  title: 'Java 17',
+  lastMessageDate: '2023-01-01',
+  botId: 'g4',
+}
+] as IChat[]
 
 

@@ -22,15 +22,22 @@ export interface IChatMessage {
   content: string;
 }
 
+export interface IChatMessageWithUserInfo {
+  chatId: string;
+  messageId: number;
+  botId: string;
+  isMine: boolean;
+  content: string;
+  name: string;
+  avatar: string;
+}
+
 export interface ICurrentChat {
   chatId: string;
   botId: string;
 }
 
-export const sendMessageState = atom({
-  key: 'sendMessageState',
-  default: ''
-});
+
 
 export const currentChatState = atom({
   key: 'currentChatStatus',
@@ -64,10 +71,5 @@ export const userInfo = atomFamily({
       avatar: '/user1.png',
     } as IUser, // default value (aka initial value)
   ]
-});
-
-export const chatMessageList = atomFamily<IChatMessage[], string>({
-  key: 'chatMessageList', // unique ID (with respect to other atoms/selectors)
-  default: [] as IChatMessage[], // default value (aka initial value)
 });
 

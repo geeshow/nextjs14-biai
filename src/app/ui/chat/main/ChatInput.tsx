@@ -3,75 +3,83 @@ import {PaperAirplaneIcon, PaperClipIcon} from "@heroicons/react/24/outline";
 import React, {useRef, useState} from "react";
 import {useSetRecoilState} from "recoil";
 import {scrollToBottomState} from "@/recoil/site";
+import ChatTextarea from "@/app/ui/chat/main/ChatTextarea";
+import {getMyInfo} from "@/app/lib/serverFetch";
+import {createChat} from "@/app/lib/actions";
+import {chatMessageListState, sendMessageState} from "@/recoil/sendMessage";
+import {useRouter} from "next/navigation";
 
-export default function ChatInput() {
+export default function ChatInput({chatId, botId}: {chatId: string, botId: string}) {
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
-  const [textAreaHeight, setTextAreaHeight] = useState('auto');
   const [chatMessage, setChatMessage] = useState('');
   const setScrollToBottom = useSetRecoilState(scrollToBottomState)
+  const setChatMessageList = useSetRecoilState(chatMessageListState(chatId))
+  const myInfo = getMyInfo();
+  const router = useRouter();
   
-  const handleResizeHeight = () => {
-    const maxHeight = Math.floor(document.body.offsetHeight / 3);
-    textAreaRef.current!!.style.height = 'auto'; //height 초기화
-    textAreaRef.current!!.style.height = Math.min(textAreaRef.current!!.scrollHeight, maxHeight) + 'px';
-  };
-  
-  const onEnter = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      if (e.nativeEvent.isComposing) return;
-      if (chatMessage.trim() === '') return;
-      
-      setScrollToBottom((prev) => prev + 1);
-      
-      if (e.shiftKey) {
-        textAreaRef.current!!.value += '\n';
-        textAreaRef.current!!.style.height = Math.min(textAreaRef.current!!.scrollHeight, Math.floor(document.body.offsetHeight / 3)) + 'px';
-      } else {
-        sendChatMessage();
-      }
-    }
+  const onTextareaEnter = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    setScrollToBottom((prev) => prev + 1);
+    await sendChatMessage();
   }
   
-  const sendChatMessage = () => {
+  const onTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setChatMessage(e.target.value);
+  }
+  
+  const sendChatMessage = async () => {
     if (chatMessage.trim() === '') return;
     setScrollToBottom((prev) => prev + 1);
-    sendChat(chatMessage);
+    
+    console.log('chatId', chatId)
+    if (chatId === 'new') {
+      const result = await createChat({botId, message: chatMessage, userId: myInfo.userId});
+      router.push(`/chat/${botId}/${result.chatId}`)
+    }
+    else
+      sendChat(chatMessage);
+    
     textAreaRef.current!!.value = '';
-    setChatMessage('');
+    // setChatMessage('');
   }
   
   
   const sendChat = (message: string) => {
-    // setSendMessage(message);
-    // setMessages((prev) => [...prev,
-    //   {
-    //     messageId: prev[prev.length-1].messageId + 1,
-    //     botId: 0,
-    //     isMine: true,
-    //     content: message,
-    //   }
-    // ]);
+    setChatMessageList((prev) => [...prev,
+      {
+        chatId: chatId,
+        messageId: new Date().getMilliseconds(),
+        botId: botId,
+        isMine: true,
+        content: message,
+        avatar: myInfo.avatar,
+        name: myInfo.name,
+      }
+    ]);
   }
+  // const createChat = (message: string) => {
+  //   const newChatId = uuidv4()
+  //   router.push(`/chat/${botId}/${newChatId}`)
+  //
+  //   addMessage((prev) => [...prev,
+  //     {
+  //       chatId: newChatId,
+  //       messageId: new Date().getMilliseconds(),
+  //       botId: botId,
+  //       isMine: true,
+  //       content: message,
+  //       avatar: myInfo.avatar,
+  //       name: myInfo.name,
+  //     }
+  //   ]);
+  // }
   
   return (
       <div className="flex items-center w-full max-w-4xl mx-auto p-2 border border-gray-300 rounded-xl">
         <PaperClipIcon className="w-6 h-6 m-2"/>
-        <textarea ref={textAreaRef} id="prompt-textarea"
-                  onChange={(e) => {
-                    handleResizeHeight();
-                    setChatMessage(e.target.value);
-                  }}
-                  style={{height: textAreaHeight}}
-                  data-id="root" placeholder="Type a message..."
-                  rows={1}
-                  onKeyDown={onEnter}
-                  className="m-0 w-full resize-none border-0 bg-transparent focus:ring-0 focus-visible:ring-0"
-        ></textarea>
-        <PaperAirplaneIcon
-            className={`w-12 h-12 p-2 rounded-xl border ${chatMessage.trim().length > 0 ? 'bg-blue-500 cursor-pointer' : 'bg-gray-200'} text-white`}
-            onClick={sendChatMessage}
-        />
+        <ChatTextarea textAreaRef={textAreaRef} onEnter={onTextareaEnter} onChange={onTextareaChange} />
+        <button onClick={sendChatMessage}>
+          <PaperAirplaneIcon className={`w-12 h-12 p-2 rounded-xl border ${chatMessage.trim().length > 0 ? 'bg-blue-500 cursor-pointer' : 'bg-gray-200'} text-white`}/>
+        </button>
       </div>
   );
 }

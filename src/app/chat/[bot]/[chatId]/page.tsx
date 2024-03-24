@@ -1,8 +1,10 @@
-import ChatAvatar from "@/app/ui/chat/main/ChatAvatar";
-import ChatContent from "@/app/ui/chat/main/ChatContent";
 import React from "react";
 import ChatAutoScroll from "@/components/organisms/ChatAutoScroll";
-import {getChat, getMyInfo} from "@/app/lib/serverFetch";
+import ChatMessageLayout from "@/app/ui/chat/main/ChatMessageLayout";
+import ChatListAfterSsr from "@/app/ui/chat/main/ChatListAfterSSR";
+import ChatScrollContainer from "@/app/ui/chat/main/ChatScrollContainer";
+import ChatInput from "@/app/ui/chat/main/ChatInput";
+import {getChat} from "@/app/lib/actions";
 
 type Props = {
   params: {
@@ -10,31 +12,28 @@ type Props = {
     chatId: string
   }
 }
-export default function ChatPage({params}: Props) {
-  const {chat, messages, bot} = getChat(params.chatId)
-  const myInfo = getMyInfo()
+export default async function ChatPage({params}: Props) {
+  const messages = await getChat(params.chatId)
   
   return (
       <>
-        <div className="flex flex-col max-w-4xl mx-auto">
-          {
-            messages.map((message, index) => {
-              const user = message.isMine ? myInfo : bot;
-              return (
-                <div key={index} className="flex w-full my-3">
-                  <div>
-                    <ChatAvatar src={user.avatar}/>
-                  </div>
-                  <div className='w-full'>
-                    <div className="font-semibold">{user.name}</div>
-                    <ChatContent content={message.content}/>
-                  </div>
-                </div>
-              );
-            })
-          }
+        <ChatScrollContainer>
+          <div className="flex flex-col max-w-4xl mx-auto">
+            {
+              messages.map((message, index) => {
+                return (
+                    <ChatMessageLayout key={index} content={message.content} name={message.name}
+                                       avatar={message.avatar}/>
+                )
+              })
+            }
+            <ChatListAfterSsr chatId={params.chatId}/>
+          </div>
+          <ChatAutoScroll/>
+        </ChatScrollContainer>
+        <div className="px-12 relative">
+          <ChatInput chatId={params.chatId} botId={params.bot} />
         </div>
-        <ChatAutoScroll/>
       </>
   );
 }

@@ -1,45 +1,33 @@
-import Link from "next/link";
-import {PencilSquareIcon, Cog8ToothIcon} from "@heroicons/react/24/outline";
-import {getMyInfo, groupedChatList} from "@/app/lib/serverFetch";
-import Image from "next/image";
+import {getMyInfo} from "@/app/lib/serverFetch";
 import React from "react";
-import SpeechBubbleBottom from "@/components/atoms/SpeechBubbleBottom";
-import SpeechBubbleLeft from "@/components/atoms/SpeechBubbleLeft";
-import SideChatIcon from "@/app/ui/chat/side/SideChatIcon";
-import SideIconButton from "@/app/ui/chat/side/SideIconButton";
+import {groupedChatList} from "@/app/lib/actions";
+import SideChatsGroup from "@/app/ui/chat/side/SideChatsGroup";
 
-export default function SideChats() {
+const monthNames = ["January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"];
+export default async function SideChats() {
   const myInfo = getMyInfo()
-  const chatGroup = groupedChatList(myInfo.userId)
+  const chatGroup = await groupedChatList(myInfo.userId)
+  console.log('chatGroup', chatGroup);
   return (
       <>
-        {chatGroup.today.length > 0 &&
-          <>
-            <p className="text-xs text-gray-500 ml-1 font-bold">Today</p>
-            <ol>
-              {chatGroup.today.map(chat => {
-                const bot = chat.bot;
-                const avatar = bot.avatar;
-                const href = `/chat/${chat.botId}/${chat.chatId}`
-                return (
-                    <li key={chat.chatId} className="group/menu my-1 py-2 pl-1 hover:bg-gray-200 rounded-md cursor-pointer">
-                      <Link href={href}>
-                        <div className="flex justify-between items-center rounded-md text-sm font-medium h-full relative">
-                          <div className="w-full pr-6">
-                            <SideIconButton title={chat.title}>
-                              <Image src={avatar} alt={bot.name} width={20} height={20} className="rounded-full"/>
-                            </SideIconButton>
-                          </div>
-                          <SideChatIcon bubbleText="More">
-                            <Cog8ToothIcon className="w-5 h-5 block group-hover/button:block bg-gray-200 text-gray-500 hover:text-gray-700"/>
-                          </SideChatIcon>
-                        </div>
-                      </Link>
-                    </li>
-                )
-              })}
-            </ol>
-          </>
+        {chatGroup.today.length > 0 && <SideChatsGroup groupName="Today" chatsInGroup={chatGroup.today} />}
+        {chatGroup.yesterday.length > 0 && <SideChatsGroup groupName="Yesterday" chatsInGroup={chatGroup.yesterday} />}
+        {chatGroup.last7Days.length > 0 && <SideChatsGroup groupName="Previous 7 Days" chatsInGroup={chatGroup.last7Days} />}
+        {chatGroup.last30Days.length > 0 && <SideChatsGroup groupName="Previous 30 Days" chatsInGroup={chatGroup.last30Days} />}
+        {
+          chatGroup.byMonth && Object.keys(chatGroup.byMonth)
+                .sort((a, b) => parseInt(b) - parseInt(a))
+                .map((month, index) => {
+                  return <SideChatsGroup key={index} groupName={monthNames[parseInt(month)]} chatsInGroup={chatGroup.byMonth[month]} />
+                })
+        }
+        {
+          chatGroup.byYear && Object.keys(chatGroup.byYear)
+                .sort((a, b) => parseInt(b) - parseInt(a))
+                .map((year, index) => {
+                  return <SideChatsGroup key={index} groupName={year} chatsInGroup={chatGroup.byYear[year]} />
+                })
         }
       </>
   );

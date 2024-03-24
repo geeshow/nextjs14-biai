@@ -10,7 +10,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <div className="fixed top-0">
             <div className="flex w-56 min-h-screen flex-col px-3 py-4 md:px-2 bg-gray-100">
               <SideMainBots />
-              <div className="h-10"></div>
+              <div className="h-5"></div>
               <SideChats />
             </div>
           </div>

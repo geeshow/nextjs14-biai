@@ -36,10 +36,10 @@ export default function ChatScrollContainer({children} : {children: React.ReactN
   }
   
   return (
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-scroll p-12">
+      <div ref={scrollContainerRef} className="flex-1 overflow-y-scroll px-12">
         {children}
-        <div className="relative">
-          <button className={`w-8 h-8 text-gray-600 rounded-full bg-white cursor-pointer absolute z-10 border right-1/2 ${isScrollToBottom ? 'block': 'hidden'}`}
+        <div className="relative flex justify-center">
+          <button className={`w-8 h-8 text-gray-600 rounded-full bg-white cursor-pointer z-10 border fixed bottom-28 ${isScrollToBottom ? 'block': 'hidden'}`}
                   onClick={moveToBottom}
           >
             <ScrollDownButton />

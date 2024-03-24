@@ -54,3 +54,18 @@ input[type='number']::-webkit-outer-spin-button {
   --tw-gradient-to: rgb(229 231 235); /* 그라데이션 끝 색상 */
   background-image: linear-gradient(to right, var(--tw-gradient-from), var(--tw-gradient-via), var(--tw-gradient-to));
 }
+
+.side-gradient-on {
+  --tw-gradient-from: rgb(209 213 219 / 0.1); /* 그라데이션 시작 색상 */
+  --tw-gradient-via: rgb(209 213 219 / 0.9); /* 그라데이션 중간 색상 */
+  --tw-gradient-to: rgb(209 213 219); /* 그라데이션 끝 색상 */
+  background-image: linear-gradient(to right, var(--tw-gradient-from), var(--tw-gradient-via), var(--tw-gradient-to));
+}
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(90deg);
+  }
+}

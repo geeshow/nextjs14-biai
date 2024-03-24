@@ -1,29 +1,34 @@
 'use server';
 
-import { z } from 'zod';
-import { sql } from '@vercel/postgres';
-import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
-import {signIn} from "@/auth";
-import {AuthError} from "next-auth";
-
+import {z} from 'zod';
+import {sql} from '@vercel/postgres';
+import {revalidatePath} from 'next/cache';
+import {bots, chats, IChat, messages} from "@/app/chat/data";
+import {v4 as uuidv4} from 'uuid';
+import {IChatMessage, IChatMessageWithUserInfo} from "@/recoil/chat";
+import {getMyInfo} from "@/app/lib/serverFetch";
+// const FormSchema = z.object({
+//   id: z.string(),
+//   customerId: z.string({
+//     invalid_type_error: 'Please select a customer.',
+//   }),
+//   amount: z.coerce
+//       .number()
+//       .gt(0, { message: 'Please enter an amount greater than $0.' }),
+//   status: z.enum(['pending', 'paid'], {
+//     invalid_type_error: 'Please select an invoice status.',
+//   }),
+//   date: z.string(),
+// });
 const FormSchema = z.object({
-  id: z.string(),
-  customerId: z.string({
-    invalid_type_error: 'Please select a customer.',
-  }),
-  amount: z.coerce
-      .number()
-      .gt(0, { message: 'Please enter an amount greater than $0.' }),
-  status: z.enum(['pending', 'paid'], {
-    invalid_type_error: 'Please select an invoice status.',
-  }),
-  date: z.string(),
+  botId: z.string(),
+  chatId: z.string(),
+  message: z.string(),
+  userId: z.string(),
 });
 
 
-const CreateInvoice = FormSchema.omit({ id: true, date: true });
-const UpdateInvoice = FormSchema.omit({ id: true, date: true });
+const CreateChat = FormSchema.omit({ chatId: true});
 
 export type State = {
   errors?: {
@@ -33,101 +38,105 @@ export type State = {
   };
   message?: string | null;
 };
-export async function createInvoice(prevState: State, formData: FormData) {
-  // Validate form fields using Zod
-  const validatedFields = CreateInvoice.safeParse({
-    customerId: formData.get('customerId'),
-    amount: formData.get('amount'),
-    status: formData.get('status'),
-  });
+export async function createChat({botId, userId, message}: {botId: string, userId: string, message: string}) {
+  const chatId = uuidv4();
+  const newChat = {
+    chatId,
+    userId,
+    title: message,
+    lastMessageDate: new Date().toISOString(),
+    botId,
+  } as IChat
+  chats.push(newChat);
   
-  // If form validation fails, return errors early. Otherwise, continue.
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Missing Fields. Failed to Create Invoice.',
-    };
-  }
+  const newMessage = {
+    chatId,
+    messageId: new Date().getMilliseconds(),
+    botId,
+    isMine: true,
+    content: message,
+  } as IChatMessage
+  messages.push(newMessage);
   
-  // Prepare data for insertion into the database
-  const { customerId, amount, status } = validatedFields.data;
-  const amountInCents = amount * 100;
-  const date = new Date().toISOString().split('T')[0];
-  
-  try {
-    await sql`
-      INSERT INTO invoices (customer_id, amount, status, date)
-      VALUES (${customerId}, ${amountInCents}, ${status}, ${date})
-    `;
-  } catch (error) {
-    return {
-      message: 'Database Error: Failed to Create Invoice.',
-    };
-  }
-  
-  revalidatePath('/chat/invoices');
-  redirect('/dashboard/invoices');
-}
-
-export async function updateInvoice(id: string, prevState: State, formData: FormData) {
-  // Validate form fields using Zod
-  const validatedFields = UpdateInvoice.safeParse({
-    customerId: formData.get('customerId'),
-    amount: formData.get('amount'),
-    status: formData.get('status'),
-  });
-  
-  // If form validation fails, return errors early. Otherwise, continue.
-  if (!validatedFields.success) {
-    return {
-      errors: validatedFields.error.flatten().fieldErrors,
-      message: 'Missing Fields. Failed to Update Invoice.',
-    };
-  }
-  
-  const { customerId, amount, status } = validatedFields.data;
-  const amountInCents = amount * 100;
-  
-  try {
-    await sql`
-        UPDATE invoices
-        SET customer_id = ${customerId}, amount = ${amountInCents}, status = ${status}
-        WHERE id = ${id}
-      `;
-  } catch (error) {
-    return { message: 'Database Error: Failed to Update Invoice.' };
-  }
-  
-  revalidatePath('/chat/invoices');
-  redirect('/dashboard/invoices');
-}
-
-export async function deleteInvoice(id: string) {
-  try {
-    await sql`DELETE FROM invoices WHERE id = ${id}`;
-    revalidatePath('/chat/invoices');
-    return { message: 'Deleted Invoice.' };
-  } catch (error) {
-    return { message: 'Database Error: Failed to Delete Invoice.' };
+  revalidatePath('/chat/g4');
+  console.log('createChat', chats);
+  return {
+    ...newChat
   }
 }
 
 
-export async function authenticate(
-    prevState: string | undefined,
-    formData: FormData,
-) {
-  try {
-    await signIn('credentials', formData);
-  } catch (error) {
-    if (error instanceof AuthError) {
-      switch (error.type) {
-        case 'CredentialsSignin':
-          return 'Invalid credentials.';
-        default:
-          return 'Something went wrong.';
+export async function getChatList(userId: string) {
+  return chats
+      .filter((item) => item.userId === userId)
+      .map((chat) => {
+        const bot = bots.filter((item) => item.botId === chat.botId)
+        return {
+          ...chat,
+          bot: bot[0]
+        }
+      })
+      .sort((a, b) => {
+        return new Date(b.lastMessageDate).getTime() - new Date(a.lastMessageDate).getTime()
+      });
+}
+export async function groupedChatList(userId: string) {
+  const grouped = {
+    today: [] as IChat[],
+    yesterday: [] as IChat[],
+    last7Days: [] as IChat[],
+    last30Days: [] as IChat[],
+    byMonth: {} as any,
+    byYear: {} as any
+  };
+  
+  const now = new Date();
+  const oneDay = 24 * 60 * 60 * 1000; // 하루의 밀리초
+  
+  const chatList = await getChatList(userId)
+  chatList.forEach(chat => {
+    const postDate = new Date(chat.lastMessageDate);
+    const diffDays = Math.round((now.getTime() - postDate.getTime()) / oneDay);
+    console.log('postDate', postDate, now, postDate.getTime(), now.getTime(), diffDays)
+    
+    if(diffDays === 0) grouped.today.push(chat);
+    else if (diffDays === 1) grouped.yesterday.push(chat);
+    else if (diffDays <= 7) grouped.last7Days.push(chat);
+    else if (diffDays <= 30) grouped.last30Days.push(chat);
+    else if (postDate.getFullYear() === now.getFullYear()) {
+      const monthKey = `${postDate.getMonth()}`;
+      if (!grouped.byMonth[monthKey]) {
+        grouped.byMonth[monthKey] = [];
       }
+      grouped.byMonth[monthKey].push(chat);
+    } else {
+      // 지난해부터 처음까지 각 해별 게시글 목록
+      const yearKey = postDate.getFullYear().toString();
+      if (!grouped.byYear[yearKey]) {
+        grouped.byYear[yearKey] = [];
+      }
+      grouped.byYear[yearKey].push(chat);
     }
-    throw error;
+  });
+  
+  return grouped;
+}
+
+export async function getChat(chatId: string) {
+  try {
+    const myInfo = getMyInfo()
+    const chat = chats.filter((item) => item.chatId === chatId)
+    const bot = bots.filter((item) => item.botId === chat[0].botId)
+    return messages
+        .filter((item) => item.chatId === chatId)
+        .map((message) => {
+          return {
+            ...message,
+            name: message.isMine ? myInfo.name : bot[0].name,
+            avatar: message.isMine ? myInfo.avatar : bot[0].avatar,
+          } as IChatMessageWithUserInfo
+        })
+  } catch (e) {
+    throw e;
   }
 }
