@@ -1,5 +1,5 @@
-import ChatAvatar from "@/components/molecules/ChatAvatar";
-import ChatContent from "@/components/molecules/ChatContent";
+import ChatAvatar from "@/app/ui/chat/main/ChatAvatar";
+import ChatContent from "@/app/ui/chat/main/ChatContent";
 import React from "react";
 import ChatAutoScroll from "@/components/organisms/ChatAutoScroll";
 import {getChat, getMyInfo} from "@/app/lib/serverFetch";

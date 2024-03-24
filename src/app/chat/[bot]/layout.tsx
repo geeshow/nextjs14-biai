@@ -1,7 +1,7 @@
 import React from "react";
 import SelectModelMenu from "@/components/organisms/SelectModelMenu";
-import ChatScrollContainer from "@/components/molecules/ChatScrollContainer";
-import ChatInput from "@/components/molecules/ChatInput";
+import ChatScrollContainer from "@/app/ui/chat/main/ChatScrollContainer";
+import ChatInput from "@/app/ui/chat/main/ChatInput";
 import {useRouter} from "next/navigation";
 import { v4 as uuidv4 } from 'uuid';
 

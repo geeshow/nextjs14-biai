@@ -14,7 +14,6 @@ export default function ChatScrollContainer({children} : {children: React.ReactN
     const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
     const gap = 15;
     const isBottom = scrollHeight - scrollTop - gap > clientHeight;
-    console.log('isBottom', isBottom, scrollHeight, scrollTop, clientHeight);
     setIsScrollBottom(isBottom);
   }, [setIsScrollBottom]);
   
