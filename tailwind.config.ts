@@ -8,6 +8,12 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      minWidth: {
+        sidebar: '246px',
+      },
+      width: {
+        sidebar: '246px',
+      },
       gridTemplateColumns: {
         '13': 'repeat(13, minmax(0, 1fr))',
       },

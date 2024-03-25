@@ -30,7 +30,6 @@ export default function ChatInput({chatId, botId}: {chatId: string, botId: strin
     if (chatMessage.trim() === '') return;
     setScrollToBottom((prev) => prev + 1);
     
-    console.log('chatId', chatId)
     if (chatId === 'new') {
       const result = await createChat({botId, message: chatMessage, userId: myInfo.userId});
       router.push(`/chat/${botId}/${result.chatId}`)

@@ -8,7 +8,6 @@ const monthNames = ["January", "February", "March", "April", "May", "June",
 export default async function SideChats() {
   const myInfo = getMyInfo()
   const chatGroup = await groupedChatList(myInfo.userId)
-  console.log('chatGroup', chatGroup);
   return (
       <>
         {chatGroup.today.length > 0 && <SideChatsGroup groupName="Today" chatsInGroup={chatGroup.today} />}

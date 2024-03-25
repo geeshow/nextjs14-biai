@@ -8,7 +8,7 @@ import {getChat} from "@/app/lib/actions";
 
 type Props = {
   params: {
-    bot: string,
+    botId: string,
     chatId: string
   }
 }
@@ -32,7 +32,7 @@ export default async function ChatPage({params}: Props) {
           <ChatAutoScroll/>
         </ChatScrollContainer>
         <div className="px-12 relative">
-          <ChatInput chatId={params.chatId} botId={params.bot} />
+          <ChatInput chatId={params.chatId} botId={params.botId} />
         </div>
       </>
   );

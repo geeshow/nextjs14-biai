@@ -12,10 +12,10 @@ export default function SideLayout({ children }: { children: React.ReactNode }) 
   }
   
   return (
-    <div id='sideNavBar' className={`${isSideNavVisible ? 'min-w-[220px]' : 'min-w-[2px]'}
+    <div id='sideNavBar' className={`${isSideNavVisible ? 'min-w-sidebar' : 'min-w-[2px]'}
         transition-all duration-100 ease-out relative`}>
       { children }
-      <div className="w-6 absolute -right-6 border-2">
+      <div className="w-6 absolute -right-5 border-2">
         <div className="group fixed flex top-1/2 z-40" onClick={toggleSideNav}>
           <SideToggleButton/>
         </div>

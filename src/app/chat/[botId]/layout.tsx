@@ -4,14 +4,14 @@ import SelectModelMenu from "@/components/organisms/SelectModelMenu";
 type Props = {
   children: React.ReactNode,
   params: {
-    bot: string
+    botId: string
   }
 }
 export default function ChatLayout({ children, params }: Props ) {
   return (
       <div className="flex flex-col w-full h-full">
         <div className="flex-1 sticky top-0 bg-white flex w-full p-2">
-          <SelectModelMenu selectedBotId={params.bot}/>
+          <SelectModelMenu selectedBotId={params.botId}/>
         </div>
         <div className="flex flex-col w-full h-full overflow-hidden">
           <div className="flex flex-col w-full h-full">

@@ -1,6 +1,7 @@
 import SideLayout from '@/app/ui/chat/side/SideLayout';
 import SideMainBots from "@/app/ui/chat/side/SideMainBots";
 import SideChats from "@/app/ui/chat/side/SideChats";
+import SideUserInfo from "@/app/ui/chat/side/SideUserInfo";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   
@@ -8,10 +9,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <div className="flex justify-center w-full h-full">
         <SideLayout>
           <div className="fixed top-0">
-            <div className="flex w-56 min-h-screen flex-col px-3 py-4 md:px-2 bg-gray-100">
-              <SideMainBots />
-              <div className="h-5"></div>
-              <SideChats />
+            <div className="flex w-sidebar min-h-screen flex-col justify-between pl-2 bg-gray-100">
+              <div className="py-4">
+                <SideMainBots/>
+              </div>
+              <div className="flex-1 h-full overflow-y-auto overflow-x-hidden relative">
+                <div className="w-full h-full absolute pr-2">
+                  <SideChats/>
+                </div>
+              </div>
+              <div>
+                <div className="h-5"></div>
+                <SideUserInfo/>
+              </div>
             </div>
           </div>
         </SideLayout>

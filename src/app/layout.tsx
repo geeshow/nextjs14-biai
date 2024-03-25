@@ -2,6 +2,7 @@ import '@/app/ui/global.css';
 import { inter } from '@/app/ui/fonts';
 import { Metadata } from 'next';
 import {RecoilProvider} from "@/recoil/RecoilProvider";
+import {UserProvider} from "@auth0/nextjs-auth0/client";
 
 export const metadata: Metadata = {
   title: {
@@ -18,11 +19,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={`${inter.className} antialiased`}>
-      <RecoilProvider>
-        {children}
-      </RecoilProvider>
-      </body>
+      <UserProvider>
+        <body className={`${inter.className} antialiased`}>
+        <RecoilProvider>
+          {children}
+        </RecoilProvider>
+        </body>
+      </UserProvider>
     </html>
   );
 }
