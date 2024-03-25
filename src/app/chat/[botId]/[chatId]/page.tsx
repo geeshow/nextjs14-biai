@@ -4,15 +4,13 @@ import ChatMessageLayout from "@/app/ui/chat/main/ChatMessageLayout";
 import ChatListAfterSsr from "@/app/ui/chat/main/ChatListAfterSSR";
 import ChatScrollContainer from "@/app/ui/chat/main/ChatScrollContainer";
 import ChatInput from "@/app/ui/chat/main/ChatInput";
-import {getChat} from "@/app/lib/actions";
+import {getChat} from "@/service/chat";
+import {useParams} from "next/navigation";
+import {getSession, Session} from "@auth0/nextjs-auth0";
 
-type Props = {
-  params: {
-    botId: string,
-    chatId: string
-  }
-}
-export default async function ChatPage({params}: Props) {
+export default async function ChatPage(){
+  const { user } = await getSession() as Session;
+  const params = useParams<{botId: string, chatId: string}>()
   const messages = await getChat(params.chatId)
   
   return (

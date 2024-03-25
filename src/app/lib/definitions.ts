@@ -1,9 +1,27 @@
-export type Model = {
+export type IChats = {
+  id: string;
+  user_id: string;
+  title: string;
+  bot_id: string;
+  message: string;
+  last_message_date: Date;
+};
+
+export type IBots = {
   id: string;
   name: string;
-  icon: string;
   description: string;
+  avatar: string;
+  signature: boolean;
 };
+
+export type IMessages = {
+  id: string;
+  chat_id: string;
+  bot_id: string;
+  is_mine: boolean;
+  content: string;
+}
 
 // This file contains type definitions for your data.
 // It describes the shape of the data, and what data type each property should accept.

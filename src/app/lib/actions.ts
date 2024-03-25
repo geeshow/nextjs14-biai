@@ -4,8 +4,8 @@ import {z} from 'zod';
 import {revalidatePath} from 'next/cache';
 import {bots, chats, IChat, messages} from "@/app/chat/data";
 import {v4 as uuidv4} from 'uuid';
-import {IChatMessage, IChatMessageWithUserInfo} from "@/recoil/chat";
-import {getMyInfo} from "@/app/lib/serverFetch";
+import {IChatMessage} from "@/recoil/chat";
+import {getServerSideMyInfo} from "@/app/lib/serverFetch";
 // const FormSchema = z.object({
 //   id: z.string(),
 //   customerId: z.string({
@@ -79,62 +79,5 @@ export async function getChatList(userId: string) {
         return new Date(b.lastMessageDate).getTime() - new Date(a.lastMessageDate).getTime()
       });
 }
-export async function groupedChatList(userId: string) {
-  const grouped = {
-    today: [] as IChat[],
-    yesterday: [] as IChat[],
-    last7Days: [] as IChat[],
-    last30Days: [] as IChat[],
-    byMonth: {} as any,
-    byYear: {} as any
-  };
-  
-  const now = new Date();
-  const oneDay = 24 * 60 * 60 * 1000; // 하루의 밀리초
-  
-  const chatList = await getChatList(userId)
-  chatList.forEach(chat => {
-    const postDate = new Date(chat.lastMessageDate);
-    const diffDays = Math.round((now.getTime() - postDate.getTime()) / oneDay);
-    
-    if(diffDays === 0) grouped.today.push(chat);
-    else if (diffDays === 1) grouped.yesterday.push(chat);
-    else if (diffDays <= 7) grouped.last7Days.push(chat);
-    else if (diffDays <= 30) grouped.last30Days.push(chat);
-    else if (postDate.getFullYear() === now.getFullYear()) {
-      const monthKey = `${postDate.getMonth()}`;
-      if (!grouped.byMonth[monthKey]) {
-        grouped.byMonth[monthKey] = [];
-      }
-      grouped.byMonth[monthKey].push(chat);
-    } else {
-      // 지난해부터 처음까지 각 해별 게시글 목록
-      const yearKey = postDate.getFullYear().toString();
-      if (!grouped.byYear[yearKey]) {
-        grouped.byYear[yearKey] = [];
-      }
-      grouped.byYear[yearKey].push(chat);
-    }
-  });
-  
-  return grouped;
-}
 
-export async function getChat(chatId: string) {
-  try {
-    const myInfo = getMyInfo()
-    const chat = chats.filter((item) => item.chatId === chatId)
-    const bot = bots.filter((item) => item.botId === chat[0].botId)
-    return messages
-        .filter((item) => item.chatId === chatId)
-        .map((message) => {
-          return {
-            ...message,
-            name: message.isMine ? myInfo.name : bot[0].name,
-            avatar: message.isMine ? myInfo.avatar : bot[0].avatar,
-          } as IChatMessageWithUserInfo
-        })
-  } catch (e) {
-    throw e;
-  }
-}
+

@@ -24,7 +24,7 @@ export interface IChatMessage {
 
 export interface IChatMessageWithUserInfo {
   chatId: string;
-  messageId: number;
+  messageId: string;
   botId: string;
   isMine: boolean;
   content: string;

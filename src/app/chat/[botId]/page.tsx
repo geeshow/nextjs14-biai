@@ -1,9 +1,6 @@
 import React from "react";
-import {getBot} from "@/app/lib/serverFetch";
-import Image from "next/image";
-import ChatScrollContainer from "@/app/ui/chat/main/ChatScrollContainer";
-import ChatInput from "@/app/ui/chat/main/ChatInput";
 import ChatLayout from "@/app/ui/chat/ChatLayout";
+import {selectBotById} from "@/repository/bots";
 
 type Props = {
   params: {
@@ -11,8 +8,8 @@ type Props = {
   }
 }
 
-export default function Page({params}: Props) {
-  const selectedBot = getBot(params.botId)
+export default async function Page({params}: Props) {
+  const selectedBot = await selectBotById(params.botId)
   
   return (
     <ChatLayout selectedBot={selectedBot}/>

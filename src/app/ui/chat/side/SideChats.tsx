@@ -1,13 +1,11 @@
-import {getMyInfo} from "@/app/lib/serverFetch";
 import React from "react";
-import {groupedChatList} from "@/app/lib/actions";
 import SideChatsGroup from "@/app/ui/chat/side/SideChatsGroup";
+import {groupedChatList} from "@/service/chat";
 
 const monthNames = ["January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"];
 export default async function SideChats() {
-  const myInfo = getMyInfo()
-  const chatGroup = await groupedChatList(myInfo.userId)
+  const chatGroup = await groupedChatList()
   return (
       <>
         {chatGroup.today.length > 0 && <SideChatsGroup groupName="Today" chatsInGroup={chatGroup.today} />}

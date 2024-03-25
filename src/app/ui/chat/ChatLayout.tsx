@@ -2,9 +2,10 @@ import ChatScrollContainer from "@/app/ui/chat/main/ChatScrollContainer";
 import Image from "next/image";
 import ChatInput from "@/app/ui/chat/main/ChatInput";
 import React from "react";
-import {IBot} from "@/app/chat/data";
+import {IBots} from "@/app/lib/definitions";
 
-export default function ChatLayout({selectedBot}: {selectedBot: IBot}) {
+export default async function ChatLayout({selectedBot}: {selectedBot: IBots}) {
+  
   return (
       <>
         <ChatScrollContainer>
@@ -16,7 +17,7 @@ export default function ChatLayout({selectedBot}: {selectedBot: IBot}) {
           </div>
         </ChatScrollContainer>
         <div className="px-12 relative">
-          <ChatInput chatId='new' botId={selectedBot.botId}/>
+          <ChatInput chatId='new' botId={selectedBot.id}/>
         </div>
       </>
   );

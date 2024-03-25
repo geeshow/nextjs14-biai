@@ -4,7 +4,6 @@ import React, {useRef, useState} from "react";
 import {useSetRecoilState} from "recoil";
 import {scrollToBottomState} from "@/recoil/site";
 import ChatTextarea from "@/app/ui/chat/main/ChatTextarea";
-import {getMyInfo} from "@/app/lib/serverFetch";
 import {createChat} from "@/app/lib/actions";
 import {chatMessageListState, sendMessageState} from "@/recoil/sendMessage";
 import {useRouter} from "next/navigation";
@@ -14,7 +13,6 @@ export default function ChatInput({chatId, botId}: {chatId: string, botId: strin
   const [chatMessage, setChatMessage] = useState('');
   const setScrollToBottom = useSetRecoilState(scrollToBottomState)
   const setChatMessageList = useSetRecoilState(chatMessageListState(chatId))
-  const myInfo = getMyInfo();
   const router = useRouter();
   
   const onTextareaEnter = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -31,8 +29,8 @@ export default function ChatInput({chatId, botId}: {chatId: string, botId: strin
     setScrollToBottom((prev) => prev + 1);
     
     if (chatId === 'new') {
-      const result = await createChat({botId, message: chatMessage, userId: myInfo.userId});
-      router.push(`/chat/${botId}/${result.chatId}`)
+      // const result = await createChat({botId, message: chatMessage, userId: myInfo.userId});
+      // router.push(`/chat/${botId}/${result.chatId}`)
     }
     else
       sendChat(chatMessage);
@@ -43,17 +41,17 @@ export default function ChatInput({chatId, botId}: {chatId: string, botId: strin
   
   
   const sendChat = (message: string) => {
-    setChatMessageList((prev) => [...prev,
-      {
-        chatId: chatId,
-        messageId: new Date().getMilliseconds(),
-        botId: botId,
-        isMine: true,
-        content: message,
-        avatar: myInfo.avatar,
-        name: myInfo.name,
-      }
-    ]);
+    // setChatMessageList((prev) => [...prev,
+    //   {
+    //     chatId: chatId,
+    //     messageId: new Date().getMilliseconds(),
+    //     botId: botId,
+    //     isMine: true,
+    //     content: message,
+    //     avatar: myInfo.avatar,
+    //     name: myInfo.name,
+    //   }
+    // ]);
   }
   // const createChat = (message: string) => {
   //   const newChatId = uuidv4()

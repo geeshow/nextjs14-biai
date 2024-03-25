@@ -1,5 +1,31 @@
 // This file contains placeholder data that you'll be replacing with real data in the Data Fetching chapter:
 // https://nextjs.org/learn/dashboard-app/fetching-data
+const bots = [
+  {
+    botId: 'g4',
+    name: 'GPT-4',
+    description: 'OpenAI GPT-4',
+    avatar: '/user1.png',
+  },
+  {
+    botId: 'g35',
+    name: 'GPT 35',
+    description: 'OpenAI GPT-3.5',
+    avatar: '/user2.png',
+  },
+  {
+    botId: 'cpro',
+    name: 'Claude Pro',
+    description: 'Anthropic Bots Pro',
+    avatar: '/claude-pro.png',
+  },
+  {
+    botId: 'copus',
+    name: 'Claude Opus',
+    description: 'Anthropic Bots Opus',
+    avatar: '/claude-opus.png',
+  }
+]
 const users = [
   {
     id: '410544b2-4001-4271-9855-fec4b6a6442a',
