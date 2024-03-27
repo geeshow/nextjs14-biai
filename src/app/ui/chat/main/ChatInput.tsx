@@ -1,82 +1,74 @@
 'use client';
-import {PaperAirplaneIcon, PaperClipIcon} from "@heroicons/react/24/outline";
+import {PaperClipIcon} from "@heroicons/react/24/outline";
 import React, {useRef, useState} from "react";
-import {useSetRecoilState} from "recoil";
-import {scrollToBottomState} from "@/recoil/site";
 import ChatTextarea from "@/app/ui/chat/main/ChatTextarea";
-import {createChat} from "@/app/lib/actions";
-import {chatMessageListState, sendMessageState} from "@/recoil/sendMessage";
-import {useRouter} from "next/navigation";
+import {createChat, ISendMessagesDto, sendChatMessageToServer} from "@/service/chat";
+import {useUser} from "@auth0/nextjs-auth0/client";
+import {useParams} from "next/navigation";
+import ChatSubmitButton from "@/app/ui/chat/main/ChatSubmitButton";
+import {useRecoilState} from "recoil";
+import {scrollToBottomState} from "@/recoil/site";
 
-export default function ChatInput({chatId, botId}: {chatId: string, botId: string}) {
+const initialState = {
+  message: '',
+}
+export default function ChatInput({addOptimisticMessages}: {addOptimisticMessages: Function}) {
+  const [actionScroll, setActionScroll] = useRecoilState<number>(scrollToBottomState);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const [chatMessage, setChatMessage] = useState('');
-  const setScrollToBottom = useSetRecoilState(scrollToBottomState)
-  const setChatMessageList = useSetRecoilState(chatMessageListState(chatId))
-  const router = useRouter();
+  const { user, error, isLoading } = useUser();
+  let {chatId, botId} = useParams<{chatId: string, botId: string}>()
   
-  const onTextareaEnter = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    setScrollToBottom((prev) => prev + 1);
-    await sendChatMessage();
+  const onNewLine = () => {
+    setActionScroll((prev: number) => prev + 1);
   }
   
   const onTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setChatMessage(e.target.value);
+    // setActionScroll((prev: number) => prev + 1);
+    setChatMessage(e.target.value.trim());
   }
   
   const sendChatMessage = async () => {
-    if (chatMessage.trim() === '') return;
-    setScrollToBottom((prev) => prev + 1);
-    
-    if (chatId === 'new') {
-      // const result = await createChat({botId, message: chatMessage, userId: myInfo.userId});
-      // router.push(`/chat/${botId}/${result.chatId}`)
-    }
-    else
-      sendChat(chatMessage);
-    
     textAreaRef.current!!.value = '';
-    // setChatMessage('');
+    textAreaRef.current!!.style.height = 'auto'; //height 초기화
+    setActionScroll((prev: number) => prev + 1);
+    onNewLine();
+    console.log('sendChatMessage');
+    
+    const sendMessageDto = {
+      chatId: chatId,
+      botId: botId,
+      content: chatMessage,
+    } as ISendMessagesDto
+    
+    if (chatId === undefined) {
+      const newChat = await createChat(user?.email as string, sendMessageDto);
+      sendMessageDto.chatId = newChat.rows[0].id;
+    }
+    
+    addOptimisticMessages({
+      chatId: sendMessageDto.chatId,
+      messageId: 0,
+      botId: botId,
+      isMine: true,
+      content: chatMessage,
+      name: user?.name,
+      avatar: user?.picture
+    });
+    
+    await sendChatMessageToServer(sendMessageDto);
+    return {
+      message: 'success',
+    }
   }
-  
-  
-  const sendChat = (message: string) => {
-    // setChatMessageList((prev) => [...prev,
-    //   {
-    //     chatId: chatId,
-    //     messageId: new Date().getMilliseconds(),
-    //     botId: botId,
-    //     isMine: true,
-    //     content: message,
-    //     avatar: myInfo.avatar,
-    //     name: myInfo.name,
-    //   }
-    // ]);
-  }
-  // const createChat = (message: string) => {
-  //   const newChatId = uuidv4()
-  //   router.push(`/chat/${botId}/${newChatId}`)
-  //
-  //   addMessage((prev) => [...prev,
-  //     {
-  //       chatId: newChatId,
-  //       messageId: new Date().getMilliseconds(),
-  //       botId: botId,
-  //       isMine: true,
-  //       content: message,
-  //       avatar: myInfo.avatar,
-  //       name: myInfo.name,
-  //     }
-  //   ]);
-  // }
   
   return (
-      <div className="flex items-center w-full max-w-4xl mx-auto p-2 border border-gray-300 rounded-xl">
-        <PaperClipIcon className="w-6 h-6 m-2"/>
-        <ChatTextarea textAreaRef={textAreaRef} onEnter={onTextareaEnter} onChange={onTextareaChange} />
-        <button onClick={sendChatMessage}>
-          <PaperAirplaneIcon className={`w-12 h-12 p-2 rounded-xl border ${chatMessage.trim().length > 0 ? 'bg-blue-500 cursor-pointer' : 'bg-gray-200'} text-white`}/>
-        </button>
+    <form action={sendChatMessage} className="relative flex items-center w-full max-w-4xl mx-auto overflow-hidden border border-gray-300 rounded-xl">
+      <div className="absolute bottom-2">
+        <PaperClipIcon className="w-5 h-5 m-2"/>
       </div>
+      <ChatTextarea textAreaRef={textAreaRef} onNewLine={onNewLine} onEnter={sendChatMessage} onChange={onTextareaChange} />
+      <ChatSubmitButton disabled={chatMessage.trim().length === 0} onSend={onNewLine} />
+    </form>
   );
 }

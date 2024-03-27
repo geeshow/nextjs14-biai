@@ -1,23 +1,37 @@
-import ChatScrollContainer from "@/app/ui/chat/main/ChatScrollContainer";
-import Image from "next/image";
+'use client';
+import React, {useOptimistic} from "react";
+import {IChatMessageWithUserInfo} from "@/recoil/chat";
 import ChatInput from "@/app/ui/chat/main/ChatInput";
-import React from "react";
-import {IBots} from "@/app/lib/definitions";
+import {useRouter} from "next/navigation";
+import {ArrowPathIcon} from "@heroicons/react/24/outline";
 
-export default async function ChatLayout({selectedBot}: {selectedBot: IBots}) {
+export default function ChatLayout({children}: {children: React.ReactNode}) {
+  const router = useRouter();
+  const [optimisticMessages, addOptimisticMessages] = useOptimistic(
+      [] as IChatMessageWithUserInfo[],
+      (prevMessages, newMessage) => {
+        return [...prevMessages, newMessage] as IChatMessageWithUserInfo[];
+      },
+  );
   
   return (
       <>
-        <ChatScrollContainer>
-          <div className="flex flex-col justify-center items-center h-full">
-            <div className="flex justify-center items-center w-12 h-12 mb-2 rounded-full border">
-              <Image src={selectedBot.avatar} alt={selectedBot.name} width={36} height={36} className="rounded-full"/>
-            </div>
-            <span className="text-2xl font-bold">{selectedBot.description}</span>
-          </div>
-        </ChatScrollContainer>
-        <div className="px-12 relative">
-          <ChatInput chatId='new' botId={selectedBot.id}/>
+        <div className="flex flex-col items-center flex-1 overflow-y-scroll px-12">
+          {children}
+          {optimisticMessages.map((message: IChatMessageWithUserInfo, index: number) => {
+            if (message.chatId) {
+              setTimeout(() => {
+                router.push(`/chat/${message.botId}/${message.chatId}`);
+              }, 1000);
+            }
+            
+            return (
+              <div key={index}><ArrowPathIcon className="w-20 h-20 p-2 animate-spin text-gray-700 font-bold"/></div>
+            )
+          })}
+        </div>
+        <div className="px-8 m-1 relative">
+          <ChatInput addOptimisticMessages={addOptimisticMessages}/>
         </div>
       </>
   );

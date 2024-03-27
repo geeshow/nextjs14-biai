@@ -37,33 +37,6 @@ export type State = {
   };
   message?: string | null;
 };
-export async function createChat({botId, userId, message}: {botId: string, userId: string, message: string}) {
-  const chatId = uuidv4();
-  const newChat = {
-    chatId,
-    userId,
-    title: message,
-    lastMessageDate: new Date().toISOString(),
-    botId,
-  } as IChat
-  chats.push(newChat);
-  
-  const newMessage = {
-    chatId,
-    messageId: new Date().getMilliseconds(),
-    botId,
-    isMine: true,
-    content: message,
-  } as IChatMessage
-  messages.push(newMessage);
-  
-  revalidatePath('/chat/g4');
-  console.log('createChat', chats);
-  return {
-    ...newChat
-  }
-}
-
 
 export async function getChatList(userId: string) {
   return chats

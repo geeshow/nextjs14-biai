@@ -9,6 +9,7 @@ export async function selectBotById(id: string) {
     if (data.rows.length === 0) {
       throw new Error('Bot not found');
     }
+    console.log('selectBotById');
     
     return data.rows[0] as IBots;
   } catch (error) {
@@ -20,6 +21,7 @@ export async function selectBotById(id: string) {
 export const selectBotAll = cache(async() => {
   try {
     const data = await sql`SELECT * FROM bots`;
+    console.log('selectBotAll');
     return data.rows as IBots[];
   } catch (error) {
     console.error('Database Error:', error);

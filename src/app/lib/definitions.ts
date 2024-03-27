@@ -1,10 +1,11 @@
+import {DateTime} from "@auth/core/providers/kakao";
+
 export type IChats = {
   id: string;
   user_id: string;
   title: string;
   bot_id: string;
-  message: string;
-  last_message_date: Date;
+  last_message_date: DateTime;
 };
 
 export type IBots = {

@@ -35,7 +35,7 @@ const config: Config = {
         }
       },
       animation: {
-        'spin-slow': 'spin 3s linear infinite',
+        spin: 'spin 3s linear infinite',
         fadeIn: 'fadeIn 1s ease-in-out',
         slideInFromLeft: 'slideInFromLeft 1s ease-in-out',
       }

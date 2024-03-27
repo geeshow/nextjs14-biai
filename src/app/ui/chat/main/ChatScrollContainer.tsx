@@ -1,21 +1,17 @@
 'use client';
-import React, {useCallback, useEffect, useRef, useState} from "react";
-import {useSetRecoilState} from "recoil";
-import {scrollToBottomState} from "@/recoil/site";
-import ScrollDownButton from "@/components/atoms/ScrollDownButton";
+import React, {useCallback, useEffect, useRef} from "react";
+import ChatInput from "@/app/ui/chat/main/ChatInput";
 
-export default function ChatScrollContainer({children} : {children: React.ReactNode}) {
+export default function ChatScrollContainer({children, showScrollButton} : {children: React.ReactNode, showScrollButton: Function}) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isScrollToBottom, setIsScrollBottom] = useState(false);
-  const setScrollToBottom = useSetRecoilState(scrollToBottomState)
   
   const handleScroll = useCallback(() => {
     if (!scrollContainerRef.current) return;
     const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current;
     const gap = 15;
     const isBottom = scrollHeight - scrollTop - gap > clientHeight;
-    setIsScrollBottom(isBottom);
-  }, [setIsScrollBottom]);
+    showScrollButton(isBottom);
+  }, [showScrollButton]);
   
   useEffect(() => {
     const scrollContainer = scrollContainerRef.current;
@@ -30,21 +26,11 @@ export default function ChatScrollContainer({children} : {children: React.ReactN
     };
   }, [handleScroll]);
   
-  
-  const moveToBottom = () => {
-    setScrollToBottom((prev) => prev + 1);
-  }
-  
   return (
-      <div ref={scrollContainerRef} className="flex-1 overflow-y-scroll px-12">
-        {children}
-        <div className="relative flex justify-center">
-          <button className={`w-8 h-8 text-gray-600 rounded-full bg-white cursor-pointer z-10 border fixed bottom-28 ${isScrollToBottom ? 'block': 'hidden'}`}
-                  onClick={moveToBottom}
-          >
-            <ScrollDownButton />
-          </button>
+      <>
+        <div ref={scrollContainerRef} className="flex flex-col items-center flex-1 overflow-y-scroll px-12">
+          { children }
         </div>
-      </div>
+      </>
   );
 }

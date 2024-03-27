@@ -1,20 +1,19 @@
-import {selectChatById, selectChatByUserId} from "@/repository/chats";
-import {fetchBotById} from "@/repository/bots";
+'use server';
+import {selectChatById, selectChatByUserId, updateLastMessage} from "@/repository/chats";
 import {IChatMessageWithUserInfo} from "@/recoil/chat";
-import {fetchMessagesByChatId} from "@/repository/messages";
-import {getServerSideMyInfo} from "@/app/lib/serverFetch";
-import {IChat} from "@/app/chat/data";
-import {getChatList} from "@/app/lib/actions";
-import {IChats} from "@/app/lib/definitions";
+import {insertMessage, selectMessagesByChatId} from "@/repository/messages";
+import {askChatGpt, getServerSideMyInfo, IGoogleUser} from "@/app/lib/serverFetch";
+import {IChats, IMessages} from "@/app/lib/definitions";
+import {selectBotById} from "@/repository/bots";
+import {getSession, Session} from "@auth0/nextjs-auth0";
+import {sql} from "@vercel/postgres";
 
 export async function getChat(chatId: string) {
   try {
+    const { user } = await getSession() as { user: IGoogleUser };
     const chat = await selectChatById(chatId)
-    const bot = await fetchBotById(chat.bot_id)
-    if (!bot) {
-      throw new Error('Bot not found')
-    }
-    const messages = await fetchMessagesByChatId(chat.id)
+    const bot = await selectBotById(chat.bot_id)
+    const messages = await selectMessagesByChatId(chat.id)
     
     return messages
         .map((message) => {
@@ -24,8 +23,8 @@ export async function getChat(chatId: string) {
             botId: message.bot_id,
             isMine: message.is_mine,
             content: message.content,
-            name: bot.name,
-            avatar: bot.avatar
+            name: message.is_mine ? user.name : bot.name,
+            avatar: message.is_mine ? user.picture : bot.avatar
           } as IChatMessageWithUserInfo
         })
   } catch (e) {
@@ -75,4 +74,40 @@ export async function groupedChatList() {
   });
   
   return grouped;
+}
+
+export type ISendMessagesDto = {
+  chatId: string;
+  botId: string;
+  content: string;
+}
+export async function sendChatMessageToServer(message: ISendMessagesDto) {
+  try {
+    const user = await getServerSideMyInfo();
+    const insertMessageData = {
+      chat_id: message.chatId,
+      bot_id: message.botId,
+      is_mine: true,
+      content: message.content
+    } as IMessages
+    
+    await insertMessage(insertMessageData);
+    await updateLastMessage(user.userId, message.chatId);
+    await askChatGpt(message);
+  } catch (e) {
+    throw e;
+  }
+}
+export async function createChat(userId: string, message: ISendMessagesDto) {
+  try {
+    const datetime = new Date().toISOString();
+    return await sql`
+        INSERT INTO chats (user_id, bot_id, title, last_message_date)
+        VALUES (${userId}, ${message.botId}, ${message.content}, ${datetime})
+        RETURNING *;
+        `
+  } catch (error) {
+    console.error('Database Error:', error);
+    throw error;
+  }
 }

@@ -1,19 +1,16 @@
 'use client';
 import React, {useEffect, useRef} from "react";
-import {useRecoilValue} from "recoil";
-import {scrollToBottomState} from "@/recoil/site";
 
-export default function ChatAutoScroll() {
-  const scrollToBottom = useRecoilValue(scrollToBottomState)
+export default function ChatAutoScroll({actionScroll}:{actionScroll: number}) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
-    messagesEndRef.current!!.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current!!.scrollIntoView({ behavior: "instant" });
   }, []);
   
   useEffect(() => {
     messagesEndRef.current!!.scrollIntoView({ behavior: "smooth" });
-  }, [scrollToBottom]);
+  }, [actionScroll]);
   
   return (
       <>
