@@ -1,8 +1,8 @@
 'use server';
 import {selectChatById, selectChatByUserId, updateLastMessage} from "@/repository/chats";
 import {IChatMessageWithUserInfo} from "@/recoil/chat";
-import {insertMessage, selectMessagesByChatId} from "@/repository/messages";
-import {askChatGpt, getServerSideMyInfo, IGoogleUser} from "@/app/lib/serverFetch";
+import {insertMessage, selectMessagesByChatId, updateMessage} from "@/repository/messages";
+import {askChatGpt, askClaude, getServerSideMyInfo, IGoogleUser} from "@/app/lib/serverFetch";
 import {IChats, IMessages} from "@/app/lib/definitions";
 import {selectBotById} from "@/repository/bots";
 import {getSession, Session} from "@auth0/nextjs-auth0";
@@ -14,19 +14,28 @@ export async function getChat(chatId: string) {
     const chat = await selectChatById(chatId)
     const bot = await selectBotById(chat.bot_id)
     const messages = await selectMessagesByChatId(chat.id)
+    const result = [] as IChatMessageWithUserInfo[]
     
-    return messages
-        .map((message) => {
-          return {
-            chatId: message.chat_id,
-            messageId: message.id,
-            botId: message.bot_id,
-            isMine: message.is_mine,
-            content: message.content,
-            name: message.is_mine ? user.name : bot.name,
-            avatar: message.is_mine ? user.picture : bot.avatar
-          } as IChatMessageWithUserInfo
-        })
+    messages.forEach((message) => {
+      result.push({
+        chatId: message.chat_id,
+        messageId: message.id,
+        botId: message.bot_id,
+        content: message.input_content,
+        name: user.name,
+        avatar: user.picture
+      })
+      result.push({
+        chatId: message.chat_id,
+        messageId: message.id,
+        botId: message.bot_id,
+        content: message.output_content,
+        name: bot.name,
+        avatar: bot.avatar
+      })
+    });
+    
+    return result;
   } catch (e) {
     throw e;
   }
@@ -83,17 +92,24 @@ export type ISendMessagesDto = {
 }
 export async function sendChatMessageToServer(message: ISendMessagesDto) {
   try {
+    const bot = await selectBotById(message.botId);
     const user = await getServerSideMyInfo();
     const insertMessageData = {
       chat_id: message.chatId,
       bot_id: message.botId,
-      is_mine: true,
-      content: message.content
+      input_content: message.content
     } as IMessages
     
-    await insertMessage(insertMessageData);
+    const newMessage = await insertMessage(insertMessageData);
     await updateLastMessage(user.userId, message.chatId);
-    await askChatGpt(message);
+    
+    if (bot.brand === 'gpt') {
+      const responseMessage = await askChatGpt(bot, message);
+      await updateMessage(newMessage.id, responseMessage);
+    } else if (bot.brand === 'claude') {
+      const responseMessage = await askClaude(bot, message);
+      await updateMessage(newMessage.id, responseMessage);
+    }
   } catch (e) {
     throw e;
   }

@@ -1,20 +1,20 @@
-// import {useUser} from "@auth0/nextjs-auth0/client";
+'use client';
 import Image from 'next/image';
-import {getSession, Session} from "@auth0/nextjs-auth0";
+import {router} from "next/client";
+import {useEffect} from "react";
+import {useUser} from "@auth0/nextjs-auth0/client";
 
-export default async function Page() {
-  const { user } = await getSession() as Session;
-  console.log('user', user)
-  // const { user, error, isLoading, checkSession} = useUser()
+export default function Page() {
+  const { user, error, isLoading } = useUser();
   const picture = user?.picture as string
   
-  // useEffect(() => {
-  //   if (!user) {
-  //     location.href = `/api/auth/login?returnTo=${encodeURIComponent('/chat')}`
-  //   } else {
-  //     router.push('/chat')
-  //   }
-  // }, [user]);
+  useEffect(() => {
+    if (!user) {
+      location.href = `/api/auth/login?returnTo=${encodeURIComponent('/chat')}`
+    } else {
+      router.push('/chat')
+    }
+  }, [user]);
 
   return (
     <main className="flex min-h-screen flex-col p-6">

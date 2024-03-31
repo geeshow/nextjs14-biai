@@ -9,7 +9,6 @@ export async function selectBotById(id: string) {
     if (data.rows.length === 0) {
       throw new Error('Bot not found');
     }
-    console.log('selectBotById');
     
     return data.rows[0] as IBots;
   } catch (error) {

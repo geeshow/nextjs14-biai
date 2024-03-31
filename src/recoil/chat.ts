@@ -26,7 +26,6 @@ export interface IChatMessageWithUserInfo {
   chatId: string;
   messageId: string;
   botId: string;
-  isMine: boolean;
   content: string;
   name: string;
   avatar: string;

@@ -22,7 +22,7 @@ export default async function SideChatsGroup({groupName, chatsInGroup} : {groupN
                   <SideChatContainer chatId={chat.id}>
                     <div className="w-full pr-6">
                       <SideIconButton title={chat.title}>
-                        <Image src={bot.avatar} alt={bot.name} width={20} height={20} className="rounded-full"/>
+                        { bot?.avatar && <Image src={bot.avatar} alt={bot.name} width={20} height={20} className="rounded-full"/> }
                       </SideIconButton>
                     </div>
                   </SideChatContainer>

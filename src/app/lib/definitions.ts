@@ -13,15 +13,25 @@ export type IBots = {
   name: string;
   description: string;
   avatar: string;
-  signature: boolean;
+  model: string,
+  price_input: number,
+  price_output: number,
+  token: string,
+  brand: string,
+  company: string,
 };
 
 export type IMessages = {
   id: string;
   chat_id: string;
   bot_id: string;
-  is_mine: boolean;
-  content: string;
+  input_content: string;
+  output_content: string;
+  input_tokens: number;
+  output_tokens: number;
+  input_price: number;
+  output_price: number;
+  finish_reason: string;
 }
 
 // This file contains type definitions for your data.

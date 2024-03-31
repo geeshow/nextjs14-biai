@@ -36,7 +36,9 @@ export default function ChatList({messages}: {messages: IChatMessageWithUserInfo
             {
               optimisticMessages.map((message: IChatMessageWithUserInfo, index: number) => {
                 return (
-                    <ChatMessageLayout key={index} content={message.content} name={message.name} avatar={message.avatar}/>
+                    <>
+                      <ChatMessageLayout key={`${index}R`} content={message.content} name={message.name} avatar={message.avatar}/>
+                    </>
                 );
               })
             }
