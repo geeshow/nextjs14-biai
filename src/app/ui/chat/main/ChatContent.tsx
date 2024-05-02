@@ -5,7 +5,7 @@ import {Prism as SyntaxHighlighter} from "react-syntax-highlighter";
 import {darcula} from "react-syntax-highlighter/dist/cjs/styles/prism";
 
 export default function ChatContent({content}: { content: string}) {
-  const processedContent = useMemo(() => content.replace(/\n/g, '  \n'), [content]);
+  const processedContent = useMemo(() => content?.replace(/\n/g, '  \n'), [content]);
   
   return (
     <ReactMarkdown

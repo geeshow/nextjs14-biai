@@ -100,9 +100,23 @@ export async function askClaude(bot: IBots, message: ISendMessagesDto) {
     body: JSON.stringify({
       model: bot.model,
       max_tokens: 1024,
+      stream: true,
       messages: sendMessages
     })
   })
+  
+  // response for stream data
+  const reader = response.body?.getReader()
+  let done = false
+  let jsonData = {}
+  while (!done) {
+    const { value, done: doneValue } = await reader?.read()
+    if (doneValue) {
+      done = true
+    } else {
+      jsonData = JSON.parse(new TextDecoder().decode(value))
+    }
+  }
   
   const jsonData = await response.json()
   console.log('response', jsonData)

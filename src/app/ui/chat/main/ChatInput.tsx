@@ -33,7 +33,6 @@ export default function ChatInput({addOptimisticMessages}: {addOptimisticMessage
     textAreaRef.current!!.style.height = 'auto'; //height 초기화
     setActionScroll((prev: number) => prev + 1);
     onNewLine();
-    console.log('sendChatMessage');
     
     const sendMessageDto = {
       chatId: chatId,
